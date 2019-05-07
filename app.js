@@ -6,6 +6,7 @@ var logger = require('morgan');
 var expressHbs = require('express-handlebars');
 var mongoose = require('mongoose');
 var session = require('express-session');
+var MongoStore = require('connect-mongo')(session);
 var passport = require('passport');
 var flash = require('connect-flash');
 
@@ -25,7 +26,13 @@ app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use(session({ secret: 'mysupersecret', resave: false, saveUninitialized: false }));
+app.use(session({
+  secret: 'mysupersecret',
+  resave: false,
+  saveUninitialized: false,
+  store: new MongoStore({ mongooseConnection: mongoose.connection }),
+  cookie: {maxAge: 180 * 60 * 1000 }
+}));
 app.use(flash());
 app.use(passport.initialize());
 app.use(passport.session());
@@ -33,6 +40,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use(function(req, res, next) {
   res.locals.login = !!req.user;
+  res.locals.session = req.session;
   next();
 });
 
