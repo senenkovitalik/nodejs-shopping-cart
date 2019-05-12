@@ -30,7 +30,18 @@ form.addEventListener('submit', function(event) {
             displayError.textContent = result.error.message;
             displayError.style.display = 'block';
         } else {
-            console.log(result.token);
+            stripeTokenHandler(result.token);
         }
     });
 });
+
+function stripeTokenHandler(token) {
+    var form = document.getElementById('checkout-form');
+    var hiddenInput = document.createElement('input');
+    hiddenInput.setAttribute('type', 'hidden');
+    hiddenInput.setAttribute('name', 'stripeToken');
+    hiddenInput.setAttribute('value', token.id);
+    form.appendChild(hiddenInput);
+
+    form.submit();
+}
