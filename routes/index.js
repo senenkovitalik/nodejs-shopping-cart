@@ -3,6 +3,7 @@ var router = express.Router();
 var Product = require('../models/product');
 var Cart = require('../models/cart');
 var Order = require('../models/order');
+var { isLoggedIn } = require('../utils/utils');
 var csrf = require('csurf');
 
 var csrfProtection = csrf();
@@ -56,6 +57,7 @@ router.get('/shopping-cart', function (req, res, next) {
 });
 
 router.route('/checkout')
+  .all(isLoggedIn)
   .get(function (req, res, next) {
     if (!req.session.cart) {
       return res.redirect('shop/shopping-cart');
