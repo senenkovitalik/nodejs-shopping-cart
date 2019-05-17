@@ -4,6 +4,8 @@ var csrf = require('csurf');
 var passport = require('passport');
 var { check } = require('express-validator/check');
 var { isLoggedIn, redirectToOldUrl, checkUserCredentials } = require('../utils/utils');
+var Order = require('../models/order');
+var Cart = require('../models/cart');
 
 var csrfProtection = csrf();
 router.use(csrfProtection);
@@ -45,7 +47,17 @@ router.route('/signin')
   );
 
 router.get('/profile', isLoggedIn, function (req, res, next) {
-  res.render('user/profile');
+  Order.find({ user: req.user }, function (err, orders) {
+    if (err) {
+      return res.write('Error!');
+    }
+    var cart;
+    orders.forEach(function (order) {
+      cart = new Cart(order.cart);
+      order.items = cart.generateArray();
+    });
+    res.render('user/profile', { orders: orders });
+  });
 });
 
 module.exports = router;
